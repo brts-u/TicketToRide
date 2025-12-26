@@ -1,0 +1,100 @@
+Lisboa Madrid 3 PINK
+Lisboa Cadiz 2 BLUE
+Cadiz Madrid 3 ORANGE
+Madrid Pamplona 3 BLACK TUNNEL
+Madrid Pamplona 3 WHITE TUNNEL
+Madrid Barcelona 2 YELLOW
+Barcelona Pamplona 2 TUNNEL
+Barcelona Marseille 4
+Pamplona Marseille 4 RED
+Pamplona Brest 4 PINK
+Pamplona Paris 4 BLUE
+Pamplona Paris 4 GREEN
+Brest Paris 3 BLACK
+Brest Dieppe 2 ORANGE
+Dieppe Paris 1 PINK
+Paris Marseille 4
+Marseille Zurich 2 PINK TUNNEL
+Marseille Roma 4 TUNNEL
+Dieppe London 2 FERRY 1
+Dieppe London 2 FERRY 1
+London Edinburgh 4 ORANGE
+London Edinburgh 4 BLACK
+London Amsterdam 2 FERRY 2
+Dieppe Bruxelles 2 GREEN
+Paris Bruxelles 2 YELLOW
+Paris Bruxelles 2 RED
+Bruxelles Amsterdam 1 BLACK
+Paris Frankfurt 3 WHITE
+Paris Frankfurt 3 ORANGE
+Bruxelles Frankfurt 2 BLUE
+Amsterdam Frankfurt 2 WHITE
+Frankfurt Essen 2 GREEN
+Amsterdam Essen 3 YELLOW
+Frankfurt Munchen 2 PINK
+Zurich Munchen 2 YELLOW TUNNEL
+Zurich Venezia 2 GREEN TUNNEL
+Munchen Venezia 2 BLUE TUNNEL
+Venezia Roma 2 BLACK
+Roma Palermo 4 FERRY 1
+Roma Brindisi 2 WHITE
+Brindisi Palermo 3 FERRY 1
+Venezia Zagrab 2
+Munchen Wien 3 ORANGE
+Frankfurt Berlin 3 BLACK
+Frankfurt Berlin 3 RED
+Berlin Essen 2 BLUE
+Essen Kobenahvn 3 FERRY 1
+Essen Kobenahvn 3 FERRY 1
+Kobenahvn Stockholm 3 YELLOW
+Kobenahvn Stockholm 3 WHITE
+Stockholm Petrograd 8 TUNNEL
+Petrograd Riga 4
+Petrograd Moskva 4 WHITE
+Petrograd Wilno 4 BLUE
+Riga Wilno 4 GREEN
+Riga Danzig 3 BLACK
+Danzig Warszawa 2
+Danzig Berlin 4
+Berlin Warszawa 4 PINK
+Berlin Warszawa 4 YELLOW
+Berlin Wien 3 GREEN
+Wien Zagrab 2
+Wien Budapest 1 RED
+Wien Budapest 1 WHITE
+Wien Warszawa 4 BLUE
+Moskva Smolensk 2 ORANGE
+Smolensk Wilno 3 YELLOW
+Warszawa Wilno 3 RED
+Wilno Kyiv 2
+Warszawa Kyiv 4
+Kyiv Budapest 6 TUNNEL
+Budapest Bucuresti 4 TUNNEL
+Budapest Zagrab 2 ORANGE
+Zagrab Sarajevo 3 RED
+Budapest Sarajevo 3 PINK
+Sarajevo Athina 4 GREEN
+Brindisi Athina 4 FERRY 1
+Sofia Athina 3 PINK
+Athina Smyrna 2 FERRY 1
+Palermo Smyrna 6 FERRY 2
+Smyrna Constantinople 2 TUNNEL
+Smyrna Angora 3 ORANGE TUNNEL
+Constantinople Angora 2 TUNNEL
+Angora Erzurum 3 BLACK
+Sofia Constantinople 3 BLUE
+Bucuresti Constantinople 3 YELLOW
+Constantinople Sevastopol 4 FERRY 2
+Erzurum Sevastopol 4 FERRY 2
+Erzurum Sochi 3 RED TUNNEL
+Sevastopol Sochi 2 FERRY 1
+Sochi Rostov 2
+Sevastopol Rostov 4
+Rostov Kharkov 2 GREEN
+Sevastopol Bucuresti 4 WHITE
+Kharkov Moskva 4
+Kharkov Kyiv 4
+Kyiv Smolensk 3 RED
+Kyiv Bucuresti 4
+Bucuresti Sofia 2 TUNNEL
+Sarajevo Sofia 2 TUNNEL
