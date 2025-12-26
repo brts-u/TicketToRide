@@ -21,8 +21,7 @@ class CardColor(Enum):
         return self.name
     @classmethod
     def random(cls):
-        return random.choice(list(cls))
-
+        return random.choices(list(cls), weights=(6,6,6,6,6,6,6,6,7), k=1)[0]
 
 EDGE_SCORES: Dict[int, int] = {
     1: 1,

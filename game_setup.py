@@ -1,8 +1,10 @@
 from __future__ import annotations
-from board_state import *
-from typing import Dict, List, Tuple
-import warnings
+from pydantic.fields import defaultdict
+from typing import List, Tuple, TYPE_CHECKING
 from enum import Enum
+
+if TYPE_CHECKING:
+    from board_state import *
 
 class PlayerColor(Enum):
     RED = 'red'
@@ -184,7 +186,7 @@ class GameState:
         while True:
             selected_cards = input().strip().split()
             selected_cards = [CardColor(card.lower()) for card in selected_cards]
-            selected_cards_counts = {}
+            selected_cards_counts = defaultdict(int)
             for card in selected_cards:
                 selected_cards_counts[card] += 1
 
@@ -210,7 +212,8 @@ class GameState:
             while True:
                 turn = input().strip().upper()
                 player = self.players[self.current_player_turn]
-                print(player.cards)
+                print(f"Your cards: {player.cards}")
+                print(f"Face-up cards to choose: {self.face_up_cards}")
                 if turn == "DRAW_CARDS":
                     self.draw_cards(player)
                     break
@@ -245,7 +248,7 @@ if __name__ == "__main__":
     cities_file = "europe/cities.txt"
     connections_file = "europe/connections.txt"
     tickets_file = "europe/tickets.txt"
-    player_info = [("Bartek", PlayerColor.RED), ("Alicja", PlayerColor.BLUE)]
+    player_info = [("Bartek", PlayerColor.RED)]#, ("Alicja", PlayerColor.BLUE)]
     game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
     print("Game setup complete. Players:")
     for player_name, player in game_state.players.items():
