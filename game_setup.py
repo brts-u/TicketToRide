@@ -205,7 +205,7 @@ class GameState:
     def begin_game(self):
         print("Game has begun!")
         print("Initial face-up cards: ", [card.name for card in self.face_up_cards])
-        while True:
+        while any(player.trains_left > 2 for player in self.players.values()):
             print(self.prompt_player_action(self.current_player_turn))
             while True:
                 turn = input().strip().upper()
@@ -223,7 +223,7 @@ class GameState:
                 else:
                     print("Invalid action. Please try again.")
             self.advance_turn()
-
+        print("Game over! Calculating final scores...")
 
 def setup_game(cities_file: str, connections_file: str, tickets_file: str, player_info: List[Tuple[str, PlayerColor]]) -> GameState:
     game_state = GameState()
