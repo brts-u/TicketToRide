@@ -1,9 +1,11 @@
 from __future__ import annotations
-from game_setup import Player
-from typing import Dict, Set
+from typing import Dict, Set, TYPE_CHECKING
 from enum import Enum
-import numpy as np
 import random
+import warnings
+
+if TYPE_CHECKING:
+    from game_setup import Player, Station
 
 class CardColor(Enum):
     RED = 'red'
@@ -15,10 +17,12 @@ class CardColor(Enum):
     BLACK = 'black'
     WHITE = 'white'
     JOKER = 'joker'
-
+    def __repr__(self):
+        return self.name
     @classmethod
     def random(cls):
         return random.choice(list(cls))
+
 
 EDGE_SCORES: Dict[int, int] = {
     1: 1,
@@ -33,13 +37,13 @@ class Node:
     def __init__(self, name):
         self.name: str = name
         self.edges: Set[Edge] = set()
+        self.occupied_by: Station | None = None
 
 class Edge:
     def __init__(self, node1: Node, node2: Node, length: int, /, tunnel: bool = False):
         self.nodes: Set[Node] = {node1, node2}
         self.length: int = length
         self.score: int = EDGE_SCORES[length]
-        self.cost: float = np.inf
         self.tunnel: bool = tunnel
         self.occupied_by: Player | None = None
 
@@ -72,6 +76,9 @@ class Graph:
 
     def get_edge(self, node1_name: str, node2_name: str) -> Edge:
         return self.edges.get(f"{node1_name} {node2_name}") or self.edges.get(f"{node2_name} {node1_name}")
+
+    def get_node(self, name: str) -> Node:
+        return self.nodes.get(name)
 
 def parse_graph(cities_file: str, connections_file: str) -> Graph:
     with open(cities_file, "r") as f:
@@ -106,7 +113,7 @@ def parse_graph(cities_file: str, connections_file: str) -> Graph:
         graph.add_node(city)
     for city1, city2, edge in edges_list:
         if city1 not in cities or city2 not in cities:
-            print(f"Warning: One of the cities {city1} or {city2} is not in the list of cities.")
+            warnings.warn(f"One of the cities {city1} or {city2} is not in the list of cities.")
         graph.add_edge(city1, city2, edge)
 
     return graph
