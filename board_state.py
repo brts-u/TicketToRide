@@ -1,17 +1,24 @@
 from __future__ import annotations
+from game_setup import Player
 from typing import Dict, Set
 from enum import Enum
 import numpy as np
+import random
 
-class Color(Enum):
-    RED = 'RED'
-    ORANGE = 'ORANGE'
-    YELLOW = 'YELLOW'
-    GREEN = 'GREEN'
-    BLUE = 'BLUE'
-    PINK = 'PINK'
-    BLACK = 'BLACK'
-    WHITE = 'WHITE'
+class CardColor(Enum):
+    RED = 'red'
+    ORANGE = 'orange'
+    YELLOW = 'yellow'
+    GREEN = 'green'
+    BLUE = 'blue'
+    PINK = 'pink'
+    BLACK = 'black'
+    WHITE = 'white'
+    JOKER = 'joker'
+
+    @classmethod
+    def random(cls):
+        return random.choice(list(cls))
 
 EDGE_SCORES: Dict[int, int] = {
     1: 1,
@@ -31,13 +38,15 @@ class Edge:
     def __init__(self, node1: Node, node2: Node, length: int, /, tunnel: bool = False):
         self.nodes: Set[Node] = {node1, node2}
         self.length: int = length
+        self.score: int = EDGE_SCORES[length]
         self.cost: float = np.inf
         self.tunnel: bool = tunnel
+        self.occupied_by: Player | None = None
 
 class ColoredEdge(Edge):
-    def __init__(self, node1: Node, node2: Node, length: int, color: Color, /, tunnel = False):
+    def __init__(self, node1: Node, node2: Node, length: int, color: CardColor, /, tunnel = False):
         super().__init__(node1, node2, length, tunnel=tunnel)
-        self.color: Color = color
+        self.color: CardColor = color
 
 class FerryEdge(Edge):
     def __init__(self, node1: Node, node2: Node, length: int, joker_cost: int):
@@ -80,15 +89,14 @@ def parse_graph(cities_file: str, connections_file: str) -> Graph:
             if parts[3] == "FERRY":
                 joker_cost = int(parts[4])
                 edge = FerryEdge(Node(city1), Node(city2), length, joker_cost)
+            elif parts[3] == "TUNNEL":
+                edge = Edge(Node(city1), Node(city2), length, tunnel=True)
             else:
-                try:
-                    color = Color(parts[3])
-                    if n > 4 and parts[4] == "TUNNEL":
-                        edge = ColoredEdge(Node(city1), Node(city2), length, color, tunnel=True)
-                    else:
-                        edge = ColoredEdge(Node(city1), Node(city2), length, color)
-                except ValueError:
-                    edge = Edge(Node(city1), Node(city2), length, tunnel=True)
+                color = CardColor(parts[3].lower())
+                if n > 4 and parts[4] == "TUNNEL":
+                    edge = ColoredEdge(Node(city1), Node(city2), length, color, tunnel=True)
+                else:
+                    edge = ColoredEdge(Node(city1), Node(city2), length, color)
         else:
             edge = Edge(Node(city1), Node(city2), length)
         edges_list.append((city1, city2, edge))
@@ -115,7 +123,7 @@ if __name__ == "__main__":
         node_names = list(edge_key.split())
         G.add_edge(node_names[0], node_names[1])
     fixed_pos = {"Cadiz": [0, 0], "Edinburgh": [0, 3], "Petrograd": [5, 3], "Erzurum": [5, 0], "Palermo": [1.5, 0], "Brest": [0, 2]}
-    pos = nx.spring_layout(G, 1/5, pos=fixed_pos, fixed=fixed_pos.keys())
+    pos = nx.spring_layout(G, 1/4, pos=fixed_pos, fixed=fixed_pos.keys())
     nx.draw(G, pos, with_labels=False, node_size=50)
     nx.draw_networkx_labels(G, pos, font_size=8, bbox=dict(facecolor="white", edgecolor="black", boxstyle="round,pad=0.3"))
     plt.show()
