@@ -63,6 +63,11 @@ class Player:
                 return False
         return True
 
+class AIPlayer(Player):
+    def __init__(self, color: PlayerColor):
+        super().__init__(color)
+        # TODO: Additional AI-specific attributes to be added here
+
 class Station:
     def __init__(self, connection: Tuple[Node, Edge], player: Player):
         self.node: Node = connection[0]
