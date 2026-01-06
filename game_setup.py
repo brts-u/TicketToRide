@@ -2,6 +2,7 @@ from __future__ import annotations
 from pydantic.fields import defaultdict
 from typing import List, Tuple, TYPE_CHECKING
 from enum import Enum
+from board_state import Graph, Node, Edge, ColoredEdge, FerryEdge, CardColor, parse_graph
 
 if TYPE_CHECKING:
     from board_state import *
@@ -250,9 +251,9 @@ def setup_game(cities_file: str, connections_file: str, tickets_file: str, playe
 
 if __name__ == "__main__":
     # Example setup
-    cities_file = "europe/cities.txt"
-    connections_file = "europe/connections.txt"
-    tickets_file = "europe/tickets.txt"
+    cities_file = "static/europe/cities.txt"
+    connections_file = "static/europe/connections.txt"
+    tickets_file = "static/europe/tickets.txt"
     player_info = [("Bartek", PlayerColor.RED)]#, ("Alicja", PlayerColor.BLUE)]
     game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
     print("Game setup complete. Players:")

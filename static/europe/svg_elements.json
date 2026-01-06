@@ -36,8 +36,8 @@
    "holes": [],
    "attributes": {
     "fill": "#e6e9f0",
-    "stroke": "None",
-    "stroke_width": 3.1999999282496
+    "stroke": "#2e3b59",
+    "stroke_width": 1.499999966367
    }
   },
   {
@@ -11345,7 +11345,7 @@
    "attributes": {
     "fill": "#debe8f",
     "stroke": "#aa783c",
-    "stroke_width": 0.499999988789
+    "stroke_width": 1.499999966367
    }
   },
   {
@@ -11395,7 +11395,7 @@
    "attributes": {
     "fill": "#debe8f",
     "stroke": "#aa783c",
-    "stroke_width": 0.499999988789
+    "stroke_width": 1.499999966367
    }
   },
   {

@@ -118,7 +118,7 @@ def parse_graph(cities_file: str, connections_file: str) -> Graph:
     return graph
 
 if __name__ == "__main__":
-    graph = parse_graph("europe/cities.txt", "europe/connections.txt")
+    graph = parse_graph("static/europe/cities.txt", "static/europe/connections.txt")
 
     import networkx as nx
     import matplotlib.pyplot as plt

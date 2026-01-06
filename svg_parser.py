@@ -97,12 +97,12 @@ def draw_svg_elements(elements, bbox):
     plt.show()
 
 if __name__ == '__main__':
-    svg_path = './static/svg/board.svg'
+    svg_path = 'static/europe/svg/board.svg'
     elements, bbox = extract_svg_elements(svg_path)
     data = {
         'bbox': bbox,
         'elements': elements,
     }
 
-    with open('./static/svg_elements.json', 'w') as f:
+    with open('static/europe/svg_elements.json', 'w') as f:
         json.dump(data, f, indent=1)
