@@ -1,8 +1,12 @@
 from __future__ import annotations
+
+import json
+
 from pydantic.fields import defaultdict
 from typing import List, Tuple, TYPE_CHECKING
 from enum import Enum
 from board_state import Graph, Node, Edge, ColoredEdge, FerryEdge, CardColor, parse_graph
+import random
 
 if TYPE_CHECKING:
     from board_state import *
@@ -22,6 +26,13 @@ class Ticket:
 
     def __repr__(self):
         return f"Ticket from {self.city1.name} to {self.city2.name} for {self.points} points"
+
+    def jsonify(self):
+        return {
+            'from': self.city1.name,
+            'to': self.city2.name,
+            'points': self.points
+        }
 
 class Player:
     def __init__(self, color: PlayerColor):
@@ -173,6 +184,16 @@ class GameState:
                 player.tickets.append(tickets[index])
                 self.available_tickets.remove(tickets[index])
 
+    def get_initial_tickets(self, player: Player):
+        short_tickets = random.sample(self.available_tickets, 3)
+        long_ticket = random.sample(self.long_tickets, 1)
+        tickets = short_tickets + long_ticket
+        player.tickets = player.tickets + tickets
+        for ticket in short_tickets:
+            self.available_tickets.remove(ticket)
+        self.long_tickets.remove(long_ticket[0])
+        return [ticket.jsonify() for ticket in tickets]
+
     def claim_route(self, player: Player):
         while True:
             print("Enter the two cities of the route you want to claim (e.g., CityA CityB): ")
@@ -234,6 +255,48 @@ class GameState:
             self.advance_turn()
         print("Game over! Calculating final scores...")
 
+    def save_json(self, json_path):
+        data = {
+            # public
+            'graph': {
+                'nodes': list(self.graph.nodes.keys()),
+                'edges': [
+                    {
+                        'node1': edge.node1.name,
+                        'node2': edge.node2.name,
+                        'length': edge.length,
+                        'color': edge.color.name if isinstance(edge, ColoredEdge) else None,
+                        'joker_cost': edge.joker_cost if isinstance(edge, FerryEdge) else None,
+                        'tunnel': edge.tunnel
+                    }
+                    for edge in self.graph.edges.values()
+                ]
+            },
+            'players': {
+                player_name: {
+                    # public
+                    'color': player.color.value,
+                    # player specific private
+                    'cards': {card_color.name: count for card_color, count in player.cards.items()},
+                    # public
+                    'trains_left': player.trains_left,
+                    # player specific private
+                    'tickets': [ticket.jsonify() for ticket in player.tickets],
+                    # public
+                    'score': player.score
+                }
+                for player_name, player in self.players.items()
+            },
+            # private
+            'available_tickets': [ticket.jsonify() for ticket in self.available_tickets],
+            'long_tickets': [ticket.jsonify() for ticket in self.long_tickets],
+            # public
+            'face_up_cards': [card.name for card in self.face_up_cards],
+            'current_player_turn': self.current_player_turn
+        }
+        with open(json_path, 'w') as f:
+            json.dump(data, f, indent=4)
+
 def setup_game(cities_file: str, connections_file: str, tickets_file: str, player_info: List[Tuple[str, PlayerColor]]) -> GameState:
     game_state = GameState()
     game_state.graph = parse_graph(cities_file, connections_file)
@@ -248,15 +311,15 @@ def setup_game(cities_file: str, connections_file: str, tickets_file: str, playe
         game_state.current_player_turn = player_info[0][0]
     return game_state
 
-
-if __name__ == "__main__":
-    # Example setup
-    cities_file = "static/europe/cities.txt"
-    connections_file = "static/europe/connections.txt"
-    tickets_file = "static/europe/tickets.txt"
-    player_info = [("Bartek", PlayerColor.RED)]#, ("Alicja", PlayerColor.BLUE)]
-    game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
-    print("Game setup complete. Players:")
-    for player_name, player in game_state.players.items():
-        print(f"{player_name} ({player.color.name}) - Cards: {player.cards}, Trains left: {player.trains_left}")
-    game_state.begin_game()
+#
+# if __name__ == "__main__":
+#     # Example setup
+#     cities_file = "static/europe/cities.txt"
+#     connections_file = "static/europe/connections.txt"
+#     tickets_file = "static/europe/tickets.txt"
+#     player_info = [("Bartek", PlayerColor.RED)]#, ("Alicja", PlayerColor.BLUE)]
+#     game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
+#     print("Game setup complete. Players:")
+#     for player_name, player in game_state.players.items():
+#         print(f"{player_name} ({player.color.name}) - Cards: {player.cards}, Trains left: {player.trains_left}")
+#     game_state.begin_game()

@@ -1,15 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Two Demo</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Game Lobby</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Username Setup Screen -->
+        <div id="username-screen" class="screen active">
+            <div class="card">
+                <h1>Welcome to the Game</h1>
+                <div class="input-group">
+                    <input type="text" id="username-input" placeholder="Enter your username" maxlength="20">
+                    <button id="set-username-btn" class="btn btn-primary">Continue</button>
+                </div>
+            </div>
+        </div>
 
-  <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.10/two.min.js"></script>
-    <script src="{{ url_for('static', filename='ticket-to-ride.js') }}"></script>
-  </body>
+        <!-- Lobby Browser Screen -->
+        <div id="lobby-browser-screen" class="screen">
+            <div class="header">
+                <h1>Game Lobbies</h1>
+                <div class="user-info">
+                    <span id="current-username"></span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="create-lobby-btn" class="btn btn-primary">Create New Lobby</button>
+                <button id="refresh-lobbies-btn" class="btn btn-secondary">Refresh</button>
+            </div>
+
+            <div class="lobby-list" id="lobby-list">
+                <div class="empty-state">
+                    <p>No lobbies available. Create one to get started!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Lobby Modal -->
+        <div id="create-lobby-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Lobby</h2>
+                    <button class="close-btn" id="close-create-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="lobby-name">Lobby Name</label>
+                        <input type="text" id="lobby-name" placeholder="My Awesome Game" maxlength="30">
+                    </div>
+                    <div class="input-group">
+                        <label for="max-players">Max Players</label>
+                        <select id="max-players">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4" selected>4 Players</option>
+                            <option value="5">5 Players</option>
+                            <option value="6">6 Players</option>
+                            <option value="8">8 Players</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancel-create-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-create-btn" class="btn btn-primary">Create Lobby</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lobby Room Screen -->
+        <div id="lobby-room-screen" class="screen">
+            <div class="header">
+                <h1 id="lobby-room-name">Lobby Name</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button id="copy-link-btn" class="btn btn-secondary">📋 Copy Link</button>
+                    <button id="leave-lobby-btn" class="btn btn-danger">Leave Lobby</button>
+                </div>
+            </div>
+
+            <div class="lobby-details">
+                <div class="lobby-info">
+                    <span id="lobby-code"></span>
+                    <span id="lobby-player-count"></span>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <h2>Players</h2>
+                <div id="players-list" class="players-list">
+                    <!-- Players will be added here dynamically -->
+                </div>
+            </div>
+
+            <div class="lobby-actions">
+                <button id="start-game-btn" class="btn btn-primary" style="display: none;">Start Game</button>
+                <div id="waiting-message" style="display: none;">
+                    <p>Waiting for host to start the game...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen (placeholder) -->
+        <div id="game-screen" class="screen">
+            <div class="header">
+                <h1>Game Started!</h1>
+            </div>
+            <div class="game-area">
+                <p>The game has started. This is where your game board would go.</p>
+                <button id="back-to-lobby-btn" class="btn btn-secondary">Back to Lobby Browser</button>
+            </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
 </html>
