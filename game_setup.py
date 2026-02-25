@@ -255,7 +255,7 @@ class GameState:
             self.advance_turn()
         print("Game over! Calculating final scores...")
 
-    def save_json(self, json_path):
+    def to_dict(self):
         data = {
             # public
             'graph': {
@@ -294,8 +294,7 @@ class GameState:
             'face_up_cards': [card.name for card in self.face_up_cards],
             'current_player_turn': self.current_player_turn
         }
-        with open(json_path, 'w') as f:
-            json.dump(data, f, indent=4)
+        return data
 
 def setup_game(cities_file: str, connections_file: str, tickets_file: str, player_info: List[Tuple[str, PlayerColor]]) -> GameState:
     game_state = GameState()

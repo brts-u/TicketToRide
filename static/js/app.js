@@ -35,12 +35,13 @@ const closeCreateModal = document.getElementById('close-create-modal');
 const cancelCreateBtn = document.getElementById('cancel-create-btn');
 const confirmCreateBtn = document.getElementById('confirm-create-btn');
 const lobbyNameInput = document.getElementById('lobby-name');
-const maxPlayersSelect = document.getElementById('max-players');
+const boardSelect = document.getElementById('board-select');
 
 // Lobby room
 const lobbyRoomName = document.getElementById('lobby-room-name');
 const lobbyCode = document.getElementById('lobby-code');
 const lobbyPlayerCount = document.getElementById('lobby-player-count');
+const lobbyBoard = document.getElementById('lobby-board');
 const playersList = document.getElementById('players-list');
 const copyLinkBtn = document.getElementById('copy-link-btn');
 const leaveLobbyBtn = document.getElementById('leave-lobby-btn');
@@ -164,11 +165,11 @@ cancelCreateBtn.addEventListener('click', () => {
 
 confirmCreateBtn.addEventListener('click', () => {
     const name = lobbyNameInput.value.trim() || `${currentUsername}'s Game`;
-    const maxPlayers = maxPlayersSelect.value;
+    const board = boardSelect.value;
     
     socket.emit('create_lobby', {
         name,
-        max_players: maxPlayers
+        board
     });
 });
 
@@ -223,12 +224,13 @@ function renderLobbyList(lobbies) {
                 <div class="lobby-name">${escapeHtml(lobby.name)}</div>
                 <div class="lobby-meta">
                     <span>🎮 Host: ${escapeHtml(lobby.host)}</span>
-                    <span>👥 ${lobby.player_count}/${lobby.max_players}</span>
+                    <span>👥 ${lobby.player_count}/5</span>
+                    <span>🗺️ ${escapeHtml(lobby.board.charAt(0).toUpperCase() + lobby.board.slice(1))}</span>
                     <span>🆔 ${lobby.id}</span>
                 </div>
             </div>
             <div class="lobby-actions">
-                ${lobby.player_count < lobby.max_players ? 
+                ${lobby.player_count < 5 ? 
                     `<button class="btn btn-primary join-lobby-btn" data-lobby-id="${lobby.id}">Join</button>` :
                     `<span class="badge badge-danger">Full</span>`
                 }
@@ -248,7 +250,8 @@ function renderLobbyList(lobbies) {
 function renderLobbyRoom(lobby) {
     lobbyRoomName.textContent = lobby.name;
     lobbyCode.textContent = `Lobby Code: ${lobby.id}`;
-    lobbyPlayerCount.textContent = `Players: ${lobby.players.length}/${lobby.max_players}`;
+    lobbyPlayerCount.textContent = `Players: ${lobby.players.length}/5`;
+    lobbyBoard.textContent = `Board: ${lobby.board.charAt(0).toUpperCase() + lobby.board.slice(1)}`;
     
     // Render players
     playersList.innerHTML = lobby.players.map(player => `
@@ -281,7 +284,7 @@ function closeModal(modal) {
     modal.classList.remove('active');
     // Reset form inputs
     lobbyNameInput.value = '';
-    maxPlayersSelect.value = '4';
+    boardSelect.value = 'europe';
 }
 
 function showNotification(message, type = 'success') {

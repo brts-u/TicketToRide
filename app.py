@@ -2,12 +2,18 @@ from flask import Flask, render_template, session, request, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import uuid
 from datetime import datetime
+import redis
 from board_state import *
 from game_setup import *
 
+HOST = 'localhost'
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+redis_client = redis.Redis(host=HOST, port=6379, db=0)
+
+MAX_PLAYERS = 5
 
 # In-memory storage for lobbies
 lobbies = {}
@@ -64,7 +70,7 @@ def handle_create_lobby(data):
             'id': player_id,
             'username': username
         }],
-        'max_players': int(data.get('max_players', 4)),
+        'board': data.get('board', 'europe'),
         'created_at': datetime.now().isoformat(),
         'started': False
     }
@@ -97,7 +103,7 @@ def handle_join_lobby(data):
     lobby = lobbies[lobby_id]
     
     # Check if lobby is full
-    if len(lobby['players']) >= lobby['max_players']:
+    if len(lobby['players']) >= MAX_PLAYERS:
         emit('error', {'message': 'Lobby is full'})
         return
     
@@ -217,7 +223,7 @@ def get_lobby_list():
             'name': lobby['name'],
             'host': lobby['players'][0]['username'] if lobby['players'] else 'Unknown',
             'player_count': len(lobby['players']),
-            'max_players': lobby['max_players'],
+            'board': lobby['board'],
             'started': lobby['started']
         }
         for lobby in lobbies.values()
@@ -233,17 +239,13 @@ def broadcast_lobby_list():
 
 game_state: GameState | None = None
 
-# In app.py
 @app.route('/game/<lobby_id>')
 def game(lobby_id):
     return render_template('ticket-to-ride.html', lobby_id=lobby_id)
 
-@app.route('/api/ping', methods=['GET'])
-def ping():
-    return jsonify({'reply': 'pong'})
-
 @app.route('/api/new-board', methods = ['GET'])
 def new_board():
+
     cities_file = "static/europe/cities.txt"
     connections_file = "static/europe/connections.txt"
     tickets_file = "static/europe/tickets.txt"
@@ -254,37 +256,17 @@ def new_board():
     with open('static/europe/svg_elements.json', 'r') as f:
         return f.read(), 200, {'Content-Type': 'application/json'}
 
-@app.route('/api/get-cards', methods=['GET'])
-def get_cards():
-    if not game_state:
-        return jsonify({'error': -1, 'message': "Game doesn't exist"})
-    cards = [str(card) for card in game_state.face_up_cards]
-    return jsonify(cards)
+@app.route('/api/get-game-state', methods = ['GET'])
+def get_game_state():
+    game_id = request.args.get('game_id')
+    if game_state is None:
+        return jsonify({'error': 'Game not initialized'}), 400
+    return jsonify(game_state.to_dict()), 200
 
-@app.route('/api/get-initial-tickets', methods=['POST']) # TODO: ZWRACA NONE TYPE, also zmien na GET
-def get_initial_tickets():
-    if not game_state:
-        return jsonify({'error': -1, 'message': "Game doesn't exist"})
-    data = request.get_json()
-    player_name = data['player']
-    player = game_state.players[player_name]
-    tickets = game_state.get_initial_tickets(player)
-    return jsonify(tickets)
-
-@app.route('/api/handle-click', methods=['POST'])
-def handle_click():
-    # Your Python code here
-    data = request.get_json()
-
-    # Example: Do something with the data
-    result = {
-        'message': 'Python code executed!',
-        'received': data
-    }
-
-    return jsonify(result)
-
-
+@app.route('/api/get-player-data', methods=['GET'])
+def get_player_data():
+    player_id = request.args.get('player_id')
+    # TODO: Fetch player data from game state using player_id
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, host=HOST, port=5000, allow_unsafe_werkzeug=True)

@@ -23,29 +23,15 @@ createBoard();
 
 
 // ========= FUNCTIONS ===========
-async function ping() {
-    try {
-        const response = await fetch('/api/ping', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        console.log('Response from server:', data);
-
-        alert(data.reply);
-    } catch (error) {
-        console.error('Error pinging server:', error);
-    }
-}
-
 async function createBoard() {
     try {
         const response = await fetch('/api/new-board', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
+            },
+            body: {
+                players: []
             }
         });
         board = await response.json();
@@ -62,51 +48,22 @@ async function createBoard() {
     } catch (error) {
         console.error('Error creating new board:', error);
     }
-    getCards();
-    getInitalTickets('Bartek');
 }
 
-async function getCards() {
+async function getGameState() {
     try {
-        const response = await fetch('/api/get-cards', {
+        const response = await fetch(`/api/get-game-state?game_id=${game_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        cards = await response.json();
-        console.log('Cards:', cards)
-        card_rand = two.makeRectangle(1550, Y_BOARD_SHIFT + CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card_rand.fill = '#000000'
-        card0 = two.makeRectangle(1550, 2 * Y_BOARD_SHIFT + 3 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card0.fill = color_map[cards[0]]
-        card1 = two.makeRectangle(1550, 3 * Y_BOARD_SHIFT + 5 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card1.fill = color_map[cards[1]]
-        card2 = two.makeRectangle(1550, 4 * Y_BOARD_SHIFT + 7 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card2.fill = color_map[cards[2]]
-        card3 = two.makeRectangle(1550, 5 * Y_BOARD_SHIFT + 9 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card3.fill = color_map[cards[3]]
-        card4 = two.makeRectangle(1550, 6 * Y_BOARD_SHIFT + 11 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
-        card4.fill = color_map[cards[4]]
-        two.update();
+        const data = await response.json();
+        console.log('Game state:', data);
+        drawCards(data.cards);
+        drawTickets(data.tickets);
     } catch (error) {
-        console.error('Error getting cards:', error)
-    }
-}
-
-async function getInitalTickets(player){
-    try {
-        const response = await fetch('/api/get-initial-tickets', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({player: player})
-        })
-        tickets = await response.json()
-        console.log('Tickets:', tickets)
-    } catch (error) {
-        console.error('Error getting tickets:', error)
+        console.error('Error fetching game state:', error);
     }
 }
 
@@ -134,7 +91,39 @@ function drawElements(elements) {
             ellipse.stroke = element.attributes.stroke;
             ellipse.linewidth = element.attributes.stroke_width / (2*SCALE);
             two.update();
-            ellipse._renderer.elem.addEventListener('click', ping);
         }
     });
+}
+
+function drawCards(cards) {
+    if (cards.length !== 5) {
+        console.error('Expected 5 cards, got', cards.length);
+        return -1;
+    }
+    card0 = two.makeRectangle(1550, 2 * Y_BOARD_SHIFT + 3 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
+    card0.fill = color_map[cards[0]]
+    card1 = two.makeRectangle(1550, 3 * Y_BOARD_SHIFT + 5 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
+    card1.fill = color_map[cards[1]]
+    card2 = two.makeRectangle(1550, 4 * Y_BOARD_SHIFT + 7 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
+    card2.fill = color_map[cards[2]]
+    card3 = two.makeRectangle(1550, 5 * Y_BOARD_SHIFT + 9 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
+    card3.fill = color_map[cards[3]]
+    card4 = two.makeRectangle(1550, 6 * Y_BOARD_SHIFT + 11 * CARD_HEIGHT/2, CARD_WIDTH, CARD_HEIGHT)
+    card4.fill = color_map[cards[4]]
+    two.update();
+}
+
+function drawTickets(tickets) {
+    tickets.forEach((ticket, index) => {
+        const x = 1550;
+        const y = 2 * Y_BOARD_SHIFT + (index + 1) * 2 * CARD_HEIGHT;
+        const line = two.makeLine(x - CARD_WIDTH/2, y - CARD_HEIGHT/2, x + CARD_WIDTH/2, y + CARD_HEIGHT/2);
+        line.stroke = '#000000';
+        line.linewidth = 2;
+        const text = two.makeText(`${ticket.start} -> ${ticket.end} (${ticket.points} pts)`, x, y);
+        text.size = 14;
+        text.family = 'Arial';
+        text.fill = '#000000';
+    });
+    two.update();
 }
