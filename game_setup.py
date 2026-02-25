@@ -7,6 +7,7 @@ from typing import List, Tuple, TYPE_CHECKING
 from enum import Enum
 from board_state import Graph, Node, Edge, ColoredEdge, FerryEdge, CardColor, parse_graph
 import random
+import warnings
 
 if TYPE_CHECKING:
     from board_state import *
@@ -103,10 +104,9 @@ class GameState:
             if len(parts) == 4 and parts[3] == 'LONG':
                 city1_name, city2_name, points_str, _ = parts
                 points = int(points_str)
-                try:
-                    city1 = self.graph.get_node(city1_name)
-                    city2 = self.graph.get_node(city2_name)
-                except KeyError:
+                city1 = self.graph.get_node(city1_name)
+                city2 = self.graph.get_node(city2_name)
+                if city1 is None or city2 is None:
                     warnings.warn(f"Ticket cities {city1_name} or {city2_name} not found in graph. Skipping ticket.")
                     continue
                 ticket = Ticket(city1, city2, points)
@@ -114,10 +114,9 @@ class GameState:
             else:
                 city1_name, city2_name, points_str = parts
                 points = int(points_str)
-                try:
-                    city1 = self.graph.get_node(city1_name)
-                    city2 = self.graph.get_node(city2_name)
-                except KeyError:
+                city1 = self.graph.get_node(city1_name)
+                city2 = self.graph.get_node(city2_name)
+                if city1 is None or city2 is None:
                     warnings.warn(f"Ticket cities {city1_name} or {city2_name} not found in graph. Skipping ticket.")
                     continue
                 ticket = Ticket(city1, city2, points)
@@ -256,6 +255,8 @@ class GameState:
         print("Game over! Calculating final scores...")
 
     def to_dict(self):
+        available_tickets = [ticket.jsonify() for ticket in self.available_tickets]
+        long_tickets = [ticket.jsonify() for ticket in self.long_tickets]
         data = {
             # public
             'graph': {
@@ -288,8 +289,8 @@ class GameState:
                 for player_name, player in self.players.items()
             },
             # private
-            'available_tickets': [ticket.jsonify() for ticket in self.available_tickets],
-            'long_tickets': [ticket.jsonify() for ticket in self.long_tickets],
+            'available_tickets': available_tickets,
+            'long_tickets': long_tickets,
             # public
             'face_up_cards': [card.name for card in self.face_up_cards],
             'current_player_turn': self.current_player_turn

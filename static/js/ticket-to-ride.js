@@ -17,37 +17,45 @@ const color_map = {
     'CardColor.WHITE': '#e6e7f1',
     'CardColor.JOKER': '#9c9c9a'
 };
-let two = null;
-let game_id = '-1';
-createBoard();
 
+// Extract lobby_id from the URL path  (/game/<lobby_id>)
+const lobby_id = window.location.pathname.split('/').pop();
+
+let two = null;
+
+const socket = io();
+
+socket.on('connect', () => {
+    // Re-join the socket room for this lobby so the broadcast reaches us.
+    // The server already placed every player into the room before redirecting,
+    // but a fresh page-load gets a new socket connection, so we rejoin here.
+    socket.emit('rejoin_game', { lobby_id });
+});
+
+socket.on('game_started', (data) => {
+    // data.board contains the full svg_elements JSON (same shape as before)
+    createBoard(data.board);
+    getCards();
+    getInitialTickets('Bartek'); // TODO: replace with actual username
+});
 
 // ========= FUNCTIONS ===========
-async function createBoard() {
-    try {
-        const response = await fetch('/api/new-board', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: {
-                players: []
-            }
-        });
-        board = await response.json();
-        console.log('Board bbox', board.bbox);
-        const params = {
-            type: Two.Types.svg,
-            width: (board.bbox[2] - board.bbox[0]) / SCALE,
-            height: (board.bbox[3] - board.bbox[1]) / SCALE,
-            fullscreen: true
-        };
-        two = new Two(params).appendTo(document.body);
-        drawElements(board.elements);
-        two.update();
-    } catch (error) {
-        console.error('Error creating new board:', error);
-    }
+
+/**
+ * Initialise the Two.js canvas and draw the board.
+ * @param {Object} board  - Parsed JSON from svg_elements.json
+ */
+function createBoard(board) {
+    console.log('Board bbox', board.bbox);
+    const params = {
+        type: Two.Types.svg,
+        width: (board.bbox[2] - board.bbox[0]) / SCALE,
+        height: (board.bbox[3] - board.bbox[1]) / SCALE,
+        fullscreen: true
+    };
+    two = new Two(params).appendTo(document.body);
+    drawElements(board.elements);
+    two.update();
 }
 
 async function getGameState() {

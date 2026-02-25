@@ -40,7 +40,8 @@ class Node:
 
 class Edge:
     def __init__(self, node1: Node, node2: Node, length: int, /, tunnel: bool = False):
-        self.nodes: Set[Node] = {node1, node2}
+        self.node1: Node = node1
+        self.node2: Node = node2
         self.length: int = length
         self.score: int = EDGE_SCORES[length]
         self.tunnel: bool = tunnel
@@ -69,6 +70,9 @@ class Graph:
     def add_edge(self, node1_name: str, node2_name: str, /, edge: Edge) -> None:
         node1 = self.add_node(node1_name)
         node2 = self.add_node(node2_name)
+        # Replace placeholder nodes in the edge with the real graph nodes
+        edge.node1 = node1
+        edge.node2 = node2
         node1.edges.add(edge)
         node2.edges.add(edge)
         self.edges[f"{node1_name} {node2_name}"] = edge

@@ -44,10 +44,10 @@ Munchen Wien 3 ORANGE
 Frankfurt Berlin 3 BLACK
 Frankfurt Berlin 3 RED
 Berlin Essen 2 BLUE
-Essen Kobenahvn 3 FERRY 1
-Essen Kobenahvn 3 FERRY 1
-Kobenahvn Stockholm 3 YELLOW
-Kobenahvn Stockholm 3 WHITE
+Essen Kobenhavn 3 FERRY 1
+Essen Kobenhavn 3 FERRY 1
+Kobenhavn Stockholm 3 YELLOW
+Kobenhavn Stockholm 3 WHITE
 Stockholm Petrograd 8 TUNNEL
 Petrograd Riga 4
 Petrograd Moskva 4 WHITE

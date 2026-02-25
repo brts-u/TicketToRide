@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, render_template, session, request, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import uuid
@@ -166,12 +168,45 @@ def handle_start_game(data):
     if lobby['host'] != player_id:
         emit('error', {'message': 'Only the host can start the game'})
         return
-    
+
+    # --- Set up game state ---
+    board_type = lobby['board']
+
+    cities_file = f"static/{board_type}/cities.txt"
+    connections_file = f"static/{board_type}/connections.txt"
+    tickets_file = f"static/{board_type}/tickets.txt"
+
+    # Map each player in the lobby to a PlayerColor
+    available_colors = list(PlayerColor)
+    player_info = [
+        (p['username'], available_colors[i])
+        for i, p in enumerate(lobby['players'])
+    ]
+
+    game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
+    game_state_data = game_state.to_dict()
+
+    redis_payload = {
+        'lobby': lobby,
+        'game_state': game_state_data
+    }
+    redis_client.set(
+        f"game:{lobby_id}",
+        json.dumps(redis_payload),
+        ex=86400  # expire after 24 hours
+    )
+
+    with open('static/europe/svg_elements.json', 'r') as f:
+        board_data = json.load(f)
+
     # Mark game as started
     lobby['started'] = True
     
     # Notify all players in the lobby
-    emit('game_started', {'lobby': lobby}, room=lobby_id)
+    emit('game_started', {
+        'lobby': lobby,
+        'board': board_data
+    }, room=lobby_id)
     
     # Update lobby list
     broadcast_lobby_list()
@@ -269,4 +304,4 @@ def get_player_data():
     # TODO: Fetch player data from game state using player_id
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host=HOST, port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

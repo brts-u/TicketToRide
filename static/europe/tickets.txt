@@ -8,7 +8,7 @@ Zurich Brindisi 6
 Zurich Budapest 6
 Warszawa Smolensk 6
 Zagrab Brindisi 6
-Paris Zagreb 7
+Paris Zagrab 7
 Brest Marseille 7
 London Berlin 7
 Edinburgh Paris 7
@@ -26,12 +26,12 @@ Marseille Essen 8
 Kyiv Sochi 8
 Madrid Zurich 8
 Berlin Bucuresti 8
-Bruxelles Danzic 9
+Bruxelles Danzig 9
 Berlin Roma 9
 Angora Kharkov 10
 Riga Bucuresti 10
 Essen Kyiv 10
-Venizia Constantinople 10
+Venezia Constantinople 10
 London Wien 10
 Athina Wilno 11
 Stockholm Wien 11
