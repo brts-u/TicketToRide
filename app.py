@@ -179,10 +179,11 @@ def handle_start_game(data):
     # Map each player in the lobby to a PlayerColor
     available_colors = list(PlayerColor)
     player_info = [
-        (p['username'], available_colors[i])
+        (p['id'], available_colors[i])
         for i, p in enumerate(lobby['players'])
     ]
 
+    global game_state
     game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
     game_state_data = game_state.to_dict()
 
@@ -196,16 +197,12 @@ def handle_start_game(data):
         ex=86400  # expire after 24 hours
     )
 
-    with open('static/europe/svg_elements.json', 'r') as f:
-        board_data = json.load(f)
-
     # Mark game as started
     lobby['started'] = True
     
     # Notify all players in the lobby
     emit('game_started', {
-        'lobby': lobby,
-        'board': board_data
+        'lobby': lobby
     }, room=lobby_id)
     
     # Update lobby list
@@ -278,29 +275,28 @@ game_state: GameState | None = None
 def game(lobby_id):
     return render_template('ticket-to-ride.html', lobby_id=lobby_id)
 
-@app.route('/api/new-board', methods = ['GET'])
-def new_board():
+@app.route('/api/game-data/<lobby_id>', methods=['GET'])
+def get_game_data(lobby_id):
+    data = redis_client.get(f"game:{lobby_id}")
+    if not data:
+        return jsonify({'error': 'Game not found'}), 404
+    return data, 200, {'Content-Type': 'application/json'}
 
-    cities_file = "static/europe/cities.txt"
-    connections_file = "static/europe/connections.txt"
-    tickets_file = "static/europe/tickets.txt"
-    player_info = [("Bartek", PlayerColor.RED)]  # , ("Alicja", PlayerColor.BLUE)]
-    global game_state
-    game_state = setup_game(cities_file, connections_file, tickets_file, player_info)
-
+@app.route('/api/init_board', methods = ['GET'])
+def init_board():
     with open('static/europe/svg_elements.json', 'r') as f:
         return f.read(), 200, {'Content-Type': 'application/json'}
 
 @app.route('/api/get-game-state', methods = ['GET'])
 def get_game_state():
-    game_id = request.args.get('game_id')
+    #game_id = request.args.get('game_id')
     if game_state is None:
         return jsonify({'error': 'Game not initialized'}), 400
     return jsonify(game_state.to_dict()), 200
 
-@app.route('/api/get-player-data', methods=['GET'])
-def get_player_data():
-    player_id = request.args.get('player_id')
+@socketio.on('get_player_data')
+def get_player_data(data):
+    pass
     # TODO: Fetch player data from game state using player_id
 
 if __name__ == '__main__':

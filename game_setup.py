@@ -307,6 +307,7 @@ def setup_game(cities_file: str, connections_file: str, tickets_file: str, playe
         for _ in range(4):
             card = CardColor.random()
             player.cards[card] += 1
+        game_state.get_initial_tickets(player)
     if player_info:
         game_state.current_player_turn = player_info[0][0]
     return game_state

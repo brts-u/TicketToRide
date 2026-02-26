@@ -22,8 +22,9 @@ const color_map = {
 const lobby_id = window.location.pathname.split('/').pop();
 
 let two = null;
-
 const socket = io();
+init();
+getGameState();
 
 socket.on('connect', () => {
     // Re-join the socket room for this lobby so the broadcast reaches us.
@@ -32,35 +33,27 @@ socket.on('connect', () => {
     socket.emit('rejoin_game', { lobby_id });
 });
 
-socket.on('game_started', (data) => {
-    // data.board contains the full svg_elements JSON (same shape as before)
-    createBoard(data.board);
-    getCards();
-    getInitialTickets('Bartek'); // TODO: replace with actual username
-});
-
 // ========= FUNCTIONS ===========
 
-/**
- * Initialise the Two.js canvas and draw the board.
- * @param {Object} board  - Parsed JSON from svg_elements.json
- */
-function createBoard(board) {
-    console.log('Board bbox', board.bbox);
+async function init() {
+    const response = await fetch(`/api/init_board`);
+    const data = await response.json();
+    console.log('Board bbox', data.bbox);
     const params = {
         type: Two.Types.svg,
-        width: (board.bbox[2] - board.bbox[0]) / SCALE,
-        height: (board.bbox[3] - board.bbox[1]) / SCALE,
+        width: (data.bbox[2] - data.bbox[0]) / SCALE,
+        height: (data.bbox[3] - data.bbox[1]) / SCALE,
         fullscreen: true
     };
     two = new Two(params).appendTo(document.body);
-    drawElements(board.elements);
+    drawElements(data.elements);
     two.update();
+    // getCards(), getInitialTickets(), etc.
 }
 
 async function getGameState() {
     try {
-        const response = await fetch(`/api/get-game-state?game_id=${game_id}`, {
+        const response = await fetch(`/api/get-game-state`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -68,8 +61,8 @@ async function getGameState() {
         });
         const data = await response.json();
         console.log('Game state:', data);
-        drawCards(data.cards);
-        drawTickets(data.tickets);
+        //drawCards(data.cards);
+        //drawTickets(data.tickets);
     } catch (error) {
         console.error('Error fetching game state:', error);
     }
@@ -121,17 +114,3 @@ function drawCards(cards) {
     two.update();
 }
 
-function drawTickets(tickets) {
-    tickets.forEach((ticket, index) => {
-        const x = 1550;
-        const y = 2 * Y_BOARD_SHIFT + (index + 1) * 2 * CARD_HEIGHT;
-        const line = two.makeLine(x - CARD_WIDTH/2, y - CARD_HEIGHT/2, x + CARD_WIDTH/2, y + CARD_HEIGHT/2);
-        line.stroke = '#000000';
-        line.linewidth = 2;
-        const text = two.makeText(`${ticket.start} -> ${ticket.end} (${ticket.points} pts)`, x, y);
-        text.size = 14;
-        text.family = 'Arial';
-        text.fill = '#000000';
-    });
-    two.update();
-}
