@@ -24,13 +24,20 @@ const lobby_id = window.location.pathname.split('/').pop();
 let two = null;
 const socket = io();
 init();
-getGameState();
 
 socket.on('connect', () => {
     // Re-join the socket room for this lobby so the broadcast reaches us.
     // The server already placed every player into the room before redirecting,
     // but a fresh page-load gets a new socket connection, so we rejoin here.
-    socket.emit('rejoin_game', { lobby_id });
+    socket.emit('get_player_data', { lobby_id });
+});
+
+socket.on('game_state_update', (data) => {
+    console.log('Public game state:', data);
+});
+
+socket.on('private_player_data', (data) => {
+    console.log('Private player data:', data);
 });
 
 // ========= FUNCTIONS ===========

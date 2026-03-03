@@ -38,8 +38,7 @@ def handle_connect():
     # Generate a unique player ID if they don't have one
     if 'player_id' not in session:
         session['player_id'] = str(uuid.uuid4())
-    
-    # Send current lobbies to the newly connected player
+
     lobby_list = get_lobby_list()
     emit('lobby_list_update', {'lobbies': lobby_list})
 
@@ -295,9 +294,48 @@ def get_game_state():
     return jsonify(game_state.to_dict()), 200
 
 @socketio.on('get_player_data')
-def get_player_data(data):
-    pass
-    # TODO: Fetch player data from game state using player_id
+def handle_get_player_data(data):
+    lobby_id = data.get('lobby_id')
+    player_id = session.get('player_id')
+    join_room(lobby_id)
+
+    raw = redis_client.get(f"game:{lobby_id}")
+    if not raw:
+        emit('error', {'message': 'Game not found'})
+        return
+
+    payload = json.loads(raw)
+    game_state_data = payload['game_state']
+
+    # Public state goes to everyone in the lobby
+    emit('game_state_update', build_public_state(game_state_data), room=lobby_id)
+
+    # Private data goes only to this player's personal room
+    player_data = game_state_data['players'].get(player_id)
+    print(game_state_data)
+    print('player_data for', player_id, ':', player_data)
+    if player_data:
+        socketio.emit('private_player_data', {
+            'cards': player_data['cards'],
+            'tickets': player_data['tickets']
+        }, to=player_id)  # <-- targeted to one socket # TODO: session id changes after page reload
+
+
+def build_public_state(game_state_data):
+    """Return game state with cards/tickets stripped from all players."""
+    return {
+        'graph': game_state_data['graph'],
+        'face_up_cards': game_state_data['face_up_cards'],
+        'current_player_turn': game_state_data['current_player_turn'],
+        'players': {
+            pid: {
+                'color': p['color'],
+                'trains_left': p['trains_left'],
+                'score': p['score']
+            }
+            for pid, p in game_state_data['players'].items()
+        }
+    }
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
